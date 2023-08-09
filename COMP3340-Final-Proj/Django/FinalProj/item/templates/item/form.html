@@ -3,7 +3,7 @@
 {% block title %}{{ title }}{% endblock %} <!-- this 'title' refers to the title "New Item" in views.py -->
 
 {% block content %}
-<h1 class="mb-6 text-3xl white-text">{{ title }}</h1> <!-- Set text color to white -->
+<h1 class="mb-6 text-3xl white-text">{{ title }}</h1>
 <form method="post" action="." enctype="multipart/form-data">
     {% csrf_token %}
     <div class="mt-0 px-6 py-6 bg-gray-100 rounded-xl">
@@ -11,9 +11,8 @@
             {{ form.as_p }}
         </div>
 
-        <!-- same code as seen in login.html -->
         {% if form.errors or form.non_field_errors %}
-            <div class="mb-3 p-6 bg-red-100 rounded-xl"> <!-- Set text color to white -->
+            <div class="mb-3 p-6 bg-red-100 rounded-xl"> 
                 {% for field in form %}
                     {{ field.errors }}
                 {% endfor %}

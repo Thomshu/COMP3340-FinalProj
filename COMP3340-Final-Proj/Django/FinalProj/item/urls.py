@@ -1,10 +1,9 @@
 # Clean and more organized way by making another urls.py in this '.item' folder
 
 from django.urls import path
-
 from . import views
 
-app_name = 'item' #namespace for the app
+app_name = 'item' 
 
 urlpatterns = [
     path('', views.browse, name='browse'),
