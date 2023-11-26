@@ -28,13 +28,15 @@
         {% endif %}
         
         <!-- Item details showing the Edit/delete button if you made the item, or Contact Seller button if you do not own the item-->
-        {% if request.user == item.created_by %} <!-- This if statement notifies you that this item is yours and allows you the option to edit/delete the item as well -->
+        {% if request.user == item.created_by or request.user.is_admin  %} <!-- This if statement notifies you that this item is yours and allows you the option to edit/delete the item as well -->
             <div class="mt-6 p-6 bg-white rounded-xl">
                 <p>You own this item</p>
 
                 <a href="{% url 'item:edit' item.id %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl">Edit Item</a> <!-- Button to Edit the item -->
                 <a href="{% url 'item:delete' item.id %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-red-500 text-white rounded-xl">Delete Item</a> <!-- Button to delete the item -->
             </div>
+        {% elif request.user.is_customer %}
+            <a href="{% url 'dashboard:cart' %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl">Add to Cart</a> <!-- Add functionality when clicking Add to Cart button -->
         {% else %} <!-- This is the case where you don't own the item. Currently does nothing, implement something if we want-->
             
         {% endif %}

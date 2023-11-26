@@ -18,3 +18,6 @@ def index(request):
         'items': items_list,
         'numPages': numPages
     })
+
+def cart(request):
+    return render(request, 'dashboard/cart.html')
