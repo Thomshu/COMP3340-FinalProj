@@ -1,12 +1,12 @@
 from django import forms
 from .models import Profile
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 class SignupForm(UserCreationForm):
     class Meta:
-        model = User
-        fields = ('username', 'email', 'password1', 'password2')
+        model = get_user_model()
+        fields = ('username', 'email', 'password1', 'password2', 'user_type')
 
     username = forms.CharField(widget=forms.TextInput(attrs={
         'placeholder': 'e.g., JohnDoe',
@@ -27,6 +27,35 @@ class SignupForm(UserCreationForm):
         'placeholder': 'Repeat password',
         'class': 'w-full py-4 px-6 rounded-xl'
     }))
+    
+    # Add a choice field for user type
+    USER_TYPE_CHOICES = [
+        ('customer', 'Customer'),
+        ('inventory_manager', 'Inventory Manager'),
+        ('admin', 'Admin'),
+    ]
+
+    user_type = forms.ChoiceField(
+        choices=USER_TYPE_CHOICES,
+        widget=forms.Select(attrs={'class': 'w-full py-4 px-6 rounded-xl'}),
+    )
+
+    # Override the save method to set the user type
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user_type = self.cleaned_data['user_type']
+
+        if user_type == 'customer':
+            user.is_customer = True
+        elif user_type == 'inventory_manager':
+            user.is_inventoryManager = True
+        elif user_type == 'admin':
+            user.is_admin = True
+
+        if commit:
+            user.save()
+
+        return user
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={
@@ -41,7 +70,7 @@ class LoginForm(AuthenticationForm):
 
 class UserUpdateForm(forms.ModelForm):
     class Meta:
-        model = User
+        model = get_user_model()
         fields = ['username', 'email']
 
     username = forms.CharField(widget=forms.TextInput(attrs={
