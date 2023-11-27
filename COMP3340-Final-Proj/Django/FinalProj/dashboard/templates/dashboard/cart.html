@@ -5,42 +5,77 @@
 
 {% block content %}
     <div class="mt-0 px-6 py-12 bg-gray-100 rounded-xl">
-        <h2 class="mb-12 text-3xl text-center font-semibold">{{ user.username }}'s Shopping Cart</h2>
+        <h2 class="mb-12 text-3xl text-center font-semibold">{{ user.username }}'s Shopping Cart {% if cart_items %}({{ cart_items|length }} Items){% else %}{% endif %}</h2>
 
         <div class="grid gap-3"> 
             <div style="background-color: white;">
-                <table style="border-collapse: collapse; width: 100%;">
-                    <thead>
-                        <tr style="margin-bottom: 20px; border-bottom: 2px solid #ddd; height: 80px;">
-                            <th colspan="2" style="width: 50%;"><h4 class="px-6 text-3xl">Item</h4></th>
-                            <th><h4 class="text-3xl">Price</h4></th>
-                            <th><h4 class="text-3xl">Quantity</h4></th>
-                            <th><h4 class="text-3xl">Total</h4></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in cart_items %}
-                            <tr style="border-bottom: 2px solid #ddd; height: 80px;">
-                                <td style="width: 6%;">
-                                    <img src="{{ item.image }}" class="rounded-t-xl" style="width: 100%; height: 100%; object-fit: contain;">
-                                </td>
-                                <td>
-                                    <h4 class="px-6 text-xl"><strong>{{ item.name }}</strong></h4>
-                                </td>
-                                <td>
-                                    <p class="text-xl">${{ item.price | floatformat:2 }}</p>
-                                </td>
-                                <td>
-                                    <p class="text-xl">{{ item.quantity }}</p> <!-- IMPLEMENT Quantity +/- to increase or decrease the quantity-->
-                                </td>
-                                <td>
-                                    <p class="text-xl">${{ item.total | floatformat:2 }}</p>
-                                </td>
+                {% if not cart_items %}
+                    <h2 style="text-align: center; margin-top: 50px; margin-bottom: 50px;" class="text-3xl"><strong>Your cart is currently empty.</strong></h2>
+                {% else %}
+                    <table style="border-collapse: collapse; width: 100%;">
+                        <thead>
+                            <tr style="margin-bottom: 20px; border-bottom: 2px solid #ddd; height: 80px;">
+                                <th colspan="2" style="width: 50%;"><h4 class="px-6 text-3xl">Item</h4></th>
+                                <th><h4 class="text-3xl">Price</h4></th>
+                                <th><h4 class="text-3xl">Quantity</h4></th>
+                                <th><h4 class="text-3xl">Total</h4></th>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <h1 class="mt-6 mb-6 px-6 text-3xl"><strong>Total: ${{ total }}</strong></h1>
+                        </thead>
+                        <tbody>
+                            {% for item in cart_items %}
+                                <tr style="border-bottom: 2px solid #ddd; height: 80px;">
+                                    <td style="width: 6%;">
+                                        <img src="{{ item.image }}" class="rounded-t-xl" style="width: 100%; height: 100%; object-fit: contain;">
+                                    </td>
+                                    <td>
+                                        <h4 class="px-6 text-xl"><strong>{{ item.name }}</strong></h4>
+                                    </td>
+                                    <td>
+                                        <p class="text-xl">${{ item.price | floatformat:2 }}</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-xl">{{ item.quantity }}</p> <!-- IMPLEMENT Quantity +/- to increase or decrease the quantity-->
+                                    </td>
+                                    <td>
+                                        <p class="text-xl">${{ item.total | floatformat:2 }}</p>
+                                    </td>
+                                    <td>
+                                        <form method="post" action="{% url 'dashboard:remove_from_cart' item_id=item.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="text-red-500">&#10006;</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="flex justify-end">
+                        <div class="bg-white p-6 w-1/2">
+                            <h2 class="text-2xl mb-4"><strong>Order Summary</strong></h2>
+                            
+                            <div class="flex justify-between">
+                                <p class="text-xl"><strong>Subtotal:</strong></p>
+                                <p class="text-xl">${{ sub_total | floatformat:2 }}</p>
+                            </div>
+
+                            <hr class="my-2">
+                            
+                            <div class="flex justify-between">
+                                <p class="text-xl"><strong>Sales Tax (13%):</strong></p>
+                                <p class="text-xl">${{ tax| floatformat:2 }}</p>
+                            </div>
+                            
+                            <hr class="my-2">
+                            
+                            <div class="flex justify-between">
+                                <h3 class="text-2xl"><strong>Total:</strong></h3>
+                                <h3 class="text-2xl"><strong>${{ total | floatformat:2 }}</strong></h3>
+                            </div>
+                            
+                            <button class="bg-black text-white px-8 py-2 mt-4 float-right">Checkout</button>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
         <div class="mt-12">

@@ -20,6 +20,15 @@ def index(request):
         'numPages': numPages
     })
 
+def cart(request):
+    cart_items = request.session.get('cart', [])
+    
+    sub_total_price = sum(item['price'] * item['quantity'] for item in cart_items)
+    tax = sub_total_price*0.13
+    total = sub_total_price+tax
+
+    return render(request, 'dashboard/cart.html', {'cart_items': cart_items, 'sub_total': sub_total_price, 'tax': tax, 'total': total})
+
 def add_to_cart(request, item_id):
     # Get the item
     item = get_object_or_404(Item, id=item_id)
@@ -53,9 +62,17 @@ def add_to_cart(request, item_id):
     # Redirect to the cart page
     return redirect(reverse('dashboard:cart'))
 
-def cart(request):
-    cart_items = request.session.get('cart', [])
-    
-    total_price = sum(item['price'] * item['quantity'] for item in cart_items)
+def remove_from_cart(request, item_id):
+    # Get the user's cart from the session
+    cart = request.session.get('cart', [])
 
-    return render(request, 'dashboard/cart.html', {'cart_items': cart_items, 'total': total_price})
+    # Check if the item is in the cart
+    cart_item = next((item for item in cart if item['id'] == item_id), None)
+
+    if cart_item:
+        # If the item is in the cart, remove it
+        cart.remove(cart_item)
+        request.session['cart'] = cart
+
+    # Redirect back to the cart page
+    return redirect(reverse('dashboard:cart'))
