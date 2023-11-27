@@ -9,10 +9,10 @@
 
         <div class="grid gap-3"> 
             <div style="background-color: white;">
-                <table>
+                <table style="border-collapse: collapse; width: 100%;">
                     <thead>
-                        <tr style="margin-bottom: 20px;">
-                            <th colspan="2"><h4 class="px-6 text-3xl">Item</h4></th>
+                        <tr style="margin-bottom: 20px; border-bottom: 2px solid #ddd; height: 80px;">
+                            <th colspan="2" style="width: 50%;"><h4 class="px-6 text-3xl">Item</h4></th>
                             <th><h4 class="text-3xl">Price</h4></th>
                             <th><h4 class="text-3xl">Quantity</h4></th>
                             <th><h4 class="text-3xl">Total</h4></th>
@@ -20,19 +20,27 @@
                     </thead>
                     <tbody>
                         {% for item in cart_items %}
-                            <tr>
-                                <td style="width: 10%;">
-                                    <img src="{{ item.image }}" class="rounded-t-xl" style="width: 100%; height: auto; object-fit: contain;">
+                            <tr style="border-bottom: 2px solid #ddd; height: 80px;">
+                                <td style="width: 6%;">
+                                    <img src="{{ item.image }}" class="rounded-t-xl" style="width: 100%; height: 100%; object-fit: contain;">
                                 </td>
-                                <td><h4 class="px-6 text-xl"><strong>{{ item.name }}</strong></h4></td>
-                                <td><p class="text-xl">${{ item.price | floatformat:2 }}</p></td>
-                                <td><p class="text-xl">{{ item.quantity }}</p></td>
-                                <td><p class="text-xl">${{ item.total | floatformat:2 }}</p></td>
+                                <td>
+                                    <h4 class="px-6 text-xl"><strong>{{ item.name }}</strong></h4>
+                                </td>
+                                <td>
+                                    <p class="text-xl">${{ item.price | floatformat:2 }}</p>
+                                </td>
+                                <td>
+                                    <p class="text-xl">{{ item.quantity }}</p> <!-- IMPLEMENT Quantity +/- to increase or decrease the quantity-->
+                                </td>
+                                <td>
+                                    <p class="text-xl">${{ item.total | floatformat:2 }}</p>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                <h1 class="text-3xl"><strong>Total: ${{ total }}</strong></h1>
+                <h1 class="mt-6 mb-6 px-6 text-3xl"><strong>Total: ${{ total }}</strong></h1>
             </div>
         </div>
         <div class="mt-12">
