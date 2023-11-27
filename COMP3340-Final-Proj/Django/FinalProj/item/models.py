@@ -20,8 +20,19 @@ class Item(models.Model):
     price = models.FloatField()
     image = models.ImageField(upload_to='item_images')
     is_sold = models.BooleanField(default=False) 
+    stock = models.PositiveIntegerField(default=0)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='items', on_delete=models.CASCADE) # <= if the user is deleted, all the items are deleted as well
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        # If stock is 0, set is_sold to True
+        if self.stock == 0:
+            self.is_sold = True
+
+        else:
+            self.is_sold = False
+        super().save(*args, **kwargs)
+
 
     def __str__(self): 
         return self.name

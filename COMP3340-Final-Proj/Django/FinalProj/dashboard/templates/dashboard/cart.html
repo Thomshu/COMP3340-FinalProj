@@ -7,21 +7,33 @@
     <div class="mt-0 px-6 py-12 bg-gray-100 rounded-xl">
         <h2 class="mb-12 text-3xl text-center font-semibold">{{ user.username }}'s Shopping Cart</h2>
 
-        <div class="grid grid-cols-3 gap-3"> <!-- This part is for showing the items -->
-            {% for item in items %}
-                <div style="background-color: white;">
-                    <a href="{% url 'item:detail' item.id %}"> <!-- This is linking to each item when clicked on! -->
-                        <div style="height: 500px; overflow: hidden; border-bottom: 1px solid #ccc;">
-                            <img src="{{ item.image.url }}" class="rounded-t-xl" style="width: 100%; height: 100%; object-fit: contain;">
-                        </div>
-
-                        <div class="p-6 bg-white rounded-b-xl">
-                            <h2 class="text-2xl"><strong>{{ item.name }}</strong></h2>
-                            <p class="text-gray-700">Price: ${{ item.price | floatformat:2 }}</p>
-                        </div>
-                    </a>
-                </div>
-            {% endfor %}
+        <div class="grid gap-3"> 
+            <div style="background-color: white;">
+                <table>
+                    <thead>
+                        <tr style="margin-bottom: 20px;">
+                            <th colspan="2"><h4 class="px-6 text-3xl">Item</h4></th>
+                            <th><h4 class="text-3xl">Price</h4></th>
+                            <th><h4 class="text-3xl">Quantity</h4></th>
+                            <th><h4 class="text-3xl">Total</h4></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart_items %}
+                            <tr>
+                                <td style="width: 10%;">
+                                    <img src="{{ item.image }}" class="rounded-t-xl" style="width: 100%; height: auto; object-fit: contain;">
+                                </td>
+                                <td><h4 class="px-6 text-xl"><strong>{{ item.name }}</strong></h4></td>
+                                <td><p class="text-xl">${{ item.price | floatformat:2 }}</p></td>
+                                <td><p class="text-xl">{{ item.quantity }}</p></td>
+                                <td><p class="text-xl">${{ item.total | floatformat:2 }}</p></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <h1 class="text-3xl"><strong>Total: ${{ total }}</strong></h1>
+            </div>
         </div>
         <div class="mt-12">
             <nav aria-label="Page navigation"> <!-- From BootStrap Pagination-->

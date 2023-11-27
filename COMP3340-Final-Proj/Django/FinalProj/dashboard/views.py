@@ -1,8 +1,9 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect, reverse
 
 from item.models import Item
 from django.core.paginator import Paginator
+from django.http import HttpResponse
 
 # This is for clicking on the dashboard button and displaying the items that the User has added
 @login_required
@@ -19,5 +20,42 @@ def index(request):
         'numPages': numPages
     })
 
+def add_to_cart(request, item_id):
+    # Get the item
+    item = get_object_or_404(Item, id=item_id)
+
+    # Get the user's cart from the session
+    cart = request.session.get('cart', [])
+
+    # Check if the item is already in the cart
+    item_in_cart = next((cart_item for cart_item in cart if cart_item['id'] == item.id), None)
+
+    if item_in_cart:
+        # If the item is already in the cart, update the quantity
+        item_in_cart['quantity'] += 1
+        item_in_cart['total'] = item_in_cart['quantity'] * item.price
+    else:
+        # If the item is not in the cart, add it with a default quantity of 1
+        cart_item = {
+            'id': item.id,
+            'image': item.image.url,  # Add the image URL
+            'name': item.name,
+            'price': item.price,
+            'quantity': 1,
+            'total': item.price * 1,  # Initial total calculation
+        }
+
+        cart.append(cart_item)
+
+    # Update the session with the modified cart
+    request.session['cart'] = cart
+
+    # Redirect to the cart page
+    return redirect(reverse('dashboard:cart'))
+
 def cart(request):
-    return render(request, 'dashboard/cart.html')
+    cart_items = request.session.get('cart', [])
+    
+    total_price = sum(item['price'] * item['quantity'] for item in cart_items)
+
+    return render(request, 'dashboard/cart.html', {'cart_items': cart_items, 'total': total_price})
