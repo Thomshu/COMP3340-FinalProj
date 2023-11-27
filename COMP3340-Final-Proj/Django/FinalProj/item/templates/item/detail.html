@@ -16,16 +16,17 @@
         
         {% if item.description %}
             <p class="text-gray-700">
-                <strong class="text-gray-700">Description:</strong><br>
+                <strong class="mb-6 text-gray-700">Description:</strong><br>
                 {{ item.description | linebreaks }}
             </p>
 
         {% else %}
-            <p class="text-gray-700">
+            <p class="mb-6 text-gray-700">
                 <strong class="text-gray-700">Description:</strong><br>
                 There is currently no additional information about this product.
             </p>
         {% endif %}
+        <h4 class="mb-6 text-1xl"><strong>Current Stock: </strong>{{ item.stock }}</h4>
         
         <!-- Item details showing the Edit/delete button if you made the item, or Contact Seller button if you do not own the item-->
         {% if request.user == item.created_by or request.user.is_admin  %} <!-- This if statement notifies you that this item is yours and allows you the option to edit/delete the item as well -->
