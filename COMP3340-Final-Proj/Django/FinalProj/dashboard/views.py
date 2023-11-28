@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 
-from item.models import Item
+from item.models import Item, Images
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 
@@ -45,9 +45,11 @@ def add_to_cart(request, item_id):
         item_in_cart['total'] = item_in_cart['quantity'] * item.price
     else:
         # If the item is not in the cart, add it with a default quantity of 1
+        first_image = item.images.first()
+        image_url = first_image.image.url if first_image else None
         cart_item = {
             'id': item.id,
-            'image': item.image.url,  # Add the image URL
+            'image': image_url,  # Add the image URL
             'name': item.name,
             'price': item.price,
             'quantity': 1,

@@ -6,7 +6,23 @@
 {% block content %}
 <div class="grid grid-cols-5 gap-6 mt-6">
     <div class="col-span-3">
-        <img src="{{ item.image.url }}" class="rounded-xl" style="display: block; margin: auto; max-width: 60%; height: auto;">
+        <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+            <div class="carousel-inner">
+                {% for image in item.images.all %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <img src="{{ image.image.url }}" class="d-block w-100" alt="..." style="display: block; margin: auto; max-width: 50%; height: auto;">
+                    </div>
+                {% endfor %}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
     </div>
 
     <div class="col-span-2 p-6 bg-gray-100 rounded-xl"> <!-- Adjust this portion for the description box for each item -->

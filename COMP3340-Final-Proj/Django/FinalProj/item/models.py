@@ -18,7 +18,6 @@ class Item(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     price = models.FloatField()
-    image = models.ImageField(upload_to='item_images')
     is_sold = models.BooleanField(default=False) 
     stock = models.PositiveIntegerField(default=0)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='items', on_delete=models.CASCADE) # <= if the user is deleted, all the items are deleted as well
@@ -36,3 +35,7 @@ class Item(models.Model):
 
     def __str__(self): 
         return self.name
+    
+class Images(models.Model):
+    item = models.ForeignKey(Item, related_name='images', on_delete=models.CASCADE, default=None)
+    image = models.ImageField(upload_to='item_images', verbose_name='Image')

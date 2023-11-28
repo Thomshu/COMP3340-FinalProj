@@ -3,25 +3,42 @@
 {% block title %}{{ title }}{% endblock %} <!-- this 'title' refers to the title "New Item" in views.py -->
 
 {% block content %}
-<h1 class="mb-6 text-3xl white-text">{{ title }}</h1>
-<form method="post" action="." enctype="multipart/form-data">
-    {% csrf_token %}
-    <div class="mt-0 px-6 py-6 bg-gray-100 rounded-xl">
-        <div class="space-y-4">
-            {{ form.as_p }}
+    <h1 class="mb-6 text-3xl white-text">{{ title }}</h1>
+    <form id="post_form" method="post" action="." enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {% for hidden in form.hidden_fields %}
+            {{ hidden }}
+        {% endfor %}
+        
+        <div class="mt-0 px-6 py-6 bg-gray-100 rounded-xl">
+            <div class="space-y-4">
+                {% for field in form %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }} <br />
+                {% endfor %}
+            </div>
+
+            {% if form.errors or form.non_field_errors %}
+                <div class="mb-3 p-6 bg-red-100 rounded-xl"> 
+                    {% for field in form %}
+                        {{ field.errors }}
+                    {% endfor %}
+
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="mt-6">
+                {{ formset.management_form }}
+                {% for form_instance in formset %}
+                    {% if form_instance.image.label_tag %}  {# Check if the form is related to the image field #}
+                        {{ form_instance }}
+                    {% endif %}
+                {% endfor %}
+            </div>
         </div>
 
-        {% if form.errors or form.non_field_errors %}
-            <div class="mb-3 p-6 bg-red-100 rounded-xl"> 
-                {% for field in form %}
-                    {{ field.errors }}
-                {% endfor %}
-
-                {{ form.non_field_errors }}
-            </div>
-        {% endif %}
-    </div>
-
-    <button class="mt-6 py-3 px-12 text-lg bg-teal-500 hover:bg-teal-700 rounded-xl text-white">Submit</button>
-</form>
+        <input type="submit" name="submit" value="Submit" class="mt-6 py-3 px-12 text-lg bg-teal-500 hover:bg-teal-700 rounded-xl text-white">
+    </form>
 {% endblock %}
