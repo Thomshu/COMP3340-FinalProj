@@ -32,7 +32,7 @@ def browse(request):
     if is_ajax(request=request):  # Check if it's an AJAX request
             # Render the item list as HTML
             html_content = render_to_string('item/item_list.html', {'items': items_list})
-            return JsonResponse({'html_content': html_content, 'numPages': numPages})
+            return JsonResponse({'html_content': html_content, 'numPages': numPages}, content_type='application/json')
 
     return render(request, 'item/browse.html', {
         'items': items_list,

@@ -34,7 +34,19 @@
                                         <p class="text-xl">${{ item.price | floatformat:2 }}</p>
                                     </td>
                                     <td>
-                                        <p class="text-xl">{{ item.quantity }}</p> <!-- IMPLEMENT Quantity +/- to increase or decrease the quantity-->
+                                        <div style="display: flex; align-items: center;">
+                                            <span style="margin-right: 8px;" class="px-8">{{ item.quantity }}</span>
+                                            <div style="display: flex; flex-direction: column;">
+                                                <form method="post" action="{% url 'dashboard:increase_quantity' item_id=item.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" style="margin-top: 4px; padding: 4px 8px; background-color: {% if item.quantity == item.stock %}#ccc;{% else %}#4CAF50;{% endif %}; color: white; width: 26px; text-align: center;" {% if item.quantity == item.stock %}disabled{% endif %}>+</button>
+                                                </form>
+                                                <form method="post" action="{% url 'dashboard:decrease_quantity' item_id=item.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" style="margin-top: 4px; padding: 4px 8px; background-color: {% if item.quantity == 1 %}#ccc;{% else %}#f44336;{% endif %}; color: white; width: 26px; text-align: center;" {% if item.quantity == 1 %}disabled{% endif %}>-</button>
+                                                </form>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td>
                                         <p class="text-xl">${{ item.total | floatformat:2 }}</p>

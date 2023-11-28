@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect, reverse
 
 from item.models import Item
 from django.core.paginator import Paginator
-from django.http import HttpResponse
+from django.http import JsonResponse
 
 # This is for clicking on the dashboard button and displaying the items that the User has added
 @login_required
@@ -52,6 +52,7 @@ def add_to_cart(request, item_id):
             'price': item.price,
             'quantity': 1,
             'total': item.price * 1,  # Initial total calculation
+            'stock': item.stock #total stock of that item
         }
 
         cart.append(cart_item)
@@ -76,3 +77,37 @@ def remove_from_cart(request, item_id):
 
     # Redirect back to the cart page
     return redirect(reverse('dashboard:cart'))
+
+# Helper function to get or create the user's cart
+def get_user_cart(request):
+    if 'cart' not in request.session:
+        request.session['cart'] = []
+    return request.session['cart']
+
+def increase_quantity(request, item_id):
+    cart = get_user_cart(request)
+    cart_item = next((item for item in cart if item['id'] == item_id), None)
+
+    if cart_item and cart_item['quantity'] < cart_item['stock']:  # Assuming 'stock' is the available quantity
+        cart_item['quantity'] += 1
+        cart_item['total'] = cart_item['quantity'] * cart_item['price']
+
+    # Update the session with the modified cart
+    request.session['cart'] = cart
+
+    # Return JSON response with updated totals
+    return redirect('dashboard:cart')
+
+def decrease_quantity(request, item_id):
+    cart = get_user_cart(request)
+    cart_item = next((item for item in cart if item['id'] == item_id), None)
+
+    if cart_item and cart_item['quantity'] > 1:
+        cart_item['quantity'] -= 1
+        cart_item['total'] = cart_item['quantity'] * cart_item['price']
+
+    # Update the session with the modified cart
+    request.session['cart'] = cart
+
+    # Return JSON response with updated totals
+    return redirect('dashboard:cart')
