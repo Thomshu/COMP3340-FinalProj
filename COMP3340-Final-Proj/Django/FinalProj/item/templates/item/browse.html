@@ -14,67 +14,96 @@
                     <button class="ml-2 mt-2 py-3 px-10 text-lg bg-teal-500 text-white rounded-xl">Search</button>
                 </form>
 
-
-                <!-- For categories portion and selected categories -->
-                <!-- Possible To-DO, extend this to selecting multiple categories at once -->
+                <!-- Categories portion and selected categories -->
                 <hr class="my-4">
-                
                 <h3 class="ml-1 mb-2 font-semibold text-2xl">Categories</h3>
-                <ul>
+                <ul id="categoryList">
                     {% for category in categories %}
-                        <li class="ml-2 py-2 px-2 rounded-xl {% if category.id == category_id %} bg-gray-300 {% endif %}"> <!-- Showing active part is coded here (Aka the one you clicked is active) -->
-                            <a href="{% url 'item:browse' %}?query={{ query }}&category={{ category.id }}">{{ category.name }}</a>
+                        <li class="ml-2 py-2 px-2 rounded-xl {% if category.id in selected_categories %} bg-gray-300 {% endif %}" data-category-id="{{ category.id }}">
+                            {{ category.name }}
                         </li>
                     {% endfor %}
                 </ul>
                 <!-- For clearing the filter -->
                 <hr class="my-2">
-
                 <ul>
-                    <li><a href="{% url 'item:browse' %}" class="ml-2 mt-2 py-3 px-10 inline-block bg-blue-500 text-lg rounded-xl text-white">Clear Filters</a></li> <!-- This is the clear filters button-->
+                    <li><a href="{% url 'item:browse' %}" class="ml-2 mt-2 py-3 px-10 inline-block bg-blue-500 text-lg rounded-xl text-white">Clear Filters</a></li>
+                    <!-- This is the clear filters button-->
                 </ul>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var categoryListItems = document.querySelectorAll("#categoryList li");
+                    
+                        categoryListItems.forEach(function (item) {
+                            item.addEventListener('click', function () {
+                                toggleCategoryFilter(parseInt(item.dataset.categoryId, 10));
+                            });
+                        });
+                    });
+                    
+                    // Array to store selected category IDs
+                    var selectedCategories = [];
+                    
+                    function toggleCategoryFilter(categoryId) {
+                        // Toggle the selected state
+                        var index = selectedCategories.indexOf(categoryId);
+                        if (index === -1) {
+                            // If not selected, add to the array
+                            selectedCategories.push(categoryId);
+                        } else {
+                            // If selected, remove from the array
+                            selectedCategories.splice(index, 1);
+                        }
+                    
+                        // Update the UI based on the selected state
+                        updateCategoryUI();
+                    
+                        // Construct the filter URL based on selected categories
+                        var filterUrl = "{% url 'item:browse' %}?query={{ query }}";
+                        for (var i = 0; i < selectedCategories.length; i++) {
+                            filterUrl += `&category=${selectedCategories[i]}`;
+                        }
+                    
+                        // Use AJAX to update the content
+                        fetch(filterUrl)
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log(data);  // Log the received data for debugging
+                                // Replace the content of the 'itemContainer' div with the new content
+                                var container = document.getElementById('itemContainer');
+                                container.innerHTML = data;
+                                
+                                // Update the browser history with the new URL
+                                history.pushState(null, '', filterUrl);
+                            });
+                    }
+                    
+                    function updateCategoryUI() {
+                        var categoryList = document.getElementById("categoryList").getElementsByTagName("li");
+                    
+                        // Remove background color from all categories
+                        for (var i = 0; i < categoryList.length; i++) {
+                            categoryList[i].classList.remove("bg-gray-300");
+                        }
+                    
+                        // Add background color to selected categories
+                        for (var i = 0; i < selectedCategories.length; i++) {
+                            var categoryElement = document.querySelector(`[data-category-id="${selectedCategories[i]}"]`);
+                            if (categoryElement) {
+                                categoryElement.classList.add("bg-gray-300");
+                            }
+                        }
+                    }
+                </script>
             </div>
 
             <div class="col-span-3">
-                <div class="grid grid-cols-3 gap-3"> <!-- This part is for showing the items -->
-                    {% for item in items %}
-                        <div>
-                            <a href="{% url 'item:detail' item.id %}"> <!-- This is linking to each item when clicked on! -->
-                                <div style="height: 400px; overflow: hidden; background-color: white; border-bottom: 2px solid #ccc;">
-                                    <img src="{{ item.image.url }}" class="rounded-t-xl" style="width: 100%; height: 100%; object-fit: contain;">
-                                </div>
-        
-                                <div class="p-6 bg-white rounded-b-xl">
-                                    <h2 class="text-2xl"><strong>{{ item.name }}</strong></h2>
-                                    <p class="text-gray-700">Price: ${{ item.price | floatformat:2 }}</p>
-                                </div>
-                            </a>
-                        </div>
-                    {% endfor %}
-                </div>
-                <div class="mt-6">
-                    <nav aria-label="Page navigation"> <!-- From BootStrap Pagination-->
-                        <ul class="pagination justify-content-center">
-                            {% if items.has_previous %}
-                                <li class="page-item"><a class="page-link" href="?page=1">&laquo First</a></li>
-                                <li class="page-item"><a class="page-link" href="?page={{ items.previous_page_number }}">Previous</a></li>
-                            {% endif %}
-        
-                            {% for i in numPages %}
-                                {% if forloop.counter == items.number %}
-                                    <li class="page-item active"><a class="page-link" href=?page={{ forloop.counter }}>{{ forloop.counter }}</a></li>
-                                {% else %}
-                                    <li class="page-item"><a class="page-link" href=?page={{ forloop.counter }}>{{ forloop.counter }}</a></li>
-                                {% endif %}
-                            {% endfor %}                    
-                            {% if items.has_next %}
-                                <li class="page-item"><a class="page-link" href="?page={{ items.next_page_number }}">Next</a></li>
-                                <li class="page-item"><a class="page-link" href="?page={{ items.paginator.num_pages }}">Last &raquo</a></li>
-                            {% endif %}
-                        </ul>
-                    </nav>
+                <!-- Container for dynamically loaded items -->
+                <div id="itemContainer">
+                    <!-- Include the item list template -->
+                    {% include 'item/item_list.html' %}
                 </div>
             </div>
-
     </div>
 {% endblock %}

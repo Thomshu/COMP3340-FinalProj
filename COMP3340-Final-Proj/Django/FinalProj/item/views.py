@@ -6,38 +6,40 @@ from .forms import NewItemForm, EditItemForm
 from .models import Category, Item
 
 from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 
-# This view is for the "Browse" page 
+def is_ajax(request):
+    return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+
 def browse(request):
-    query = request.GET.get('query', '') #Backend query part
-    category_id = request.GET.get('category', 0) #defaulted to 0, aka no category selected
+    query = request.GET.get('query', '')  # Backend query part
+    selected_categories = request.GET.getlist('category')  # Get a list of selected categories
     categories = Category.objects.all()
-    items = Item.objects.filter(is_sold=False) #Once again maybe remove if we don't care about is_sold
+    items = Item.objects.filter(is_sold=False)
+
+    if selected_categories:
+        items = items.filter(category__in=selected_categories)
+
+    if query:
+        items = items.filter(Q(name__icontains=query) | Q(description__icontains=query))
+
     p = Paginator(items, 9)
     page = request.GET.get('page')
     items_list = p.get_page(page)
     numPages = "a" * items_list.paginator.num_pages
 
-    if category_id: # user selected a category
-        items = items.filter(category_id=category_id) #then display the items of that specific category
-        p = Paginator(items, 9)
-        page = request.GET.get('page')
-        items_list = p.get_page(page)
-        numPages = "a" * items_list.paginator.num_pages
-
-    if query: #Aka the user has filled it out
-        items = items.filter(Q(name__icontains=query) | Q(description__icontains=query)) #If name or description contains the queried thing, case insensitive
-        p = Paginator(items, 9)
-        page = request.GET.get('page')
-        items_list = p.get_page(page)
-        numPages = "a" * items_list.paginator.num_pages
+    if is_ajax(request=request):  # Check if it's an AJAX request
+            # Render the item list as HTML
+            html_content = render_to_string('item/item_list.html', {'items': items_list})
+            return JsonResponse({'html_content': html_content, 'numPages': numPages})
 
     return render(request, 'item/browse.html', {
         'items': items_list,
         'numPages': numPages,
         'query': query,
         'categories': categories,
-        'category_id': int(category_id)
+        'selected_categories': selected_categories
     })
 
 # This view is for creating the details page for the item
