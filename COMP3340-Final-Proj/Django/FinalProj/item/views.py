@@ -12,6 +12,10 @@ from django.template.loader import render_to_string
 from django.forms import modelformset_factory
 from django.template.loader import get_template
 
+from django.contrib.auth.decorators import user_passes_test
+
+def is_inventory_manager(user):
+    return user.is_authenticated and user.is_inventoryManager
 
 def browse(request):
     query = request.GET.get('query', '')
@@ -101,7 +105,7 @@ def new(request):
 
 @login_required
 def edit(request, pk):
-    item = get_object_or_404(Item, pk=pk, created_by=request.user)
+    item = get_object_or_404(Item, pk=pk)
 
     ImageFormSet = modelformset_factory(Images, form=ImageForm, extra=3, max_num=3)
 
@@ -136,7 +140,11 @@ def edit(request, pk):
 #This is for deleting items
 @login_required
 def delete(request, pk):
-    item = get_object_or_404(Item, pk=pk, created_by=request.user)
+    item = get_object_or_404(Item, pk=pk)
     item.delete()
 
-    return redirect('dashboard:index') #after deleting return to dashboard
+     # Redirect based on user role
+    if is_inventory_manager(request.user):
+        return redirect('dashboard:index')
+    else:
+        return redirect('item:browse')
