@@ -10,16 +10,12 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 
 from django.forms import modelformset_factory
-from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.template.loader import get_template
 
-
-def is_ajax(request):
-    return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
 def browse(request):
-    query = request.GET.get('query', '')  # Backend query part
-    selected_categories = request.GET.getlist('category')  # Get a list of selected categories
+    query = request.GET.get('query', '')
+    selected_categories = request.GET.getlist('category')
     categories = Category.objects.all()
     items = Item.objects.filter(is_sold=False)
 
@@ -34,11 +30,17 @@ def browse(request):
     items_list = p.get_page(page)
     numPages = "a" * items_list.paginator.num_pages
 
-    if is_ajax(request=request):  # Check if it's an AJAX request
-            # Render the item list as HTML
-            html_content = render_to_string('item/item_list.html', {'items': items_list})
-            return JsonResponse({'html_content': html_content, 'numPages': numPages}, content_type='application/json')
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
+    if is_ajax:
+        # If the request is AJAX, render only the content of the item_list template
+        template = get_template('item/item_list.html')
+        html_content = template.render({'items': items_list})
+        print("AJAX request. Returning JSON response.")
+        return JsonResponse({'html_content': html_content, 'numPages': numPages})
 
+    # If it's not an AJAX request, render the HTML page
+    print("Non-AJAX request. Rendering HTML page.")
     return render(request, 'item/browse.html', {
         'items': items_list,
         'numPages': numPages,
