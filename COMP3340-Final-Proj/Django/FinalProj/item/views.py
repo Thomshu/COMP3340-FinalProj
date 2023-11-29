@@ -6,13 +6,14 @@ from .forms import NewItemForm, EditItemForm, ImageForm
 from .models import Category, Item, Images
 
 from django.core.paginator import Paginator
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 
 from django.forms import modelformset_factory
 from django.template.loader import get_template
 
 from django.contrib.auth.decorators import user_passes_test
+import csv
 
 def is_inventory_manager(user):
     return user.is_authenticated and user.is_inventoryManager
@@ -148,3 +149,33 @@ def delete(request, pk):
         return redirect('dashboard:index')
     else:
         return redirect('item:browse')
+    
+def export_items_to_csv(request):
+    # Get all items and related data
+    items = Item.objects.all()
+
+    # Create response object with appropriate CSV headers
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="items_export.csv"'
+
+    # Create a CSV writer object
+    writer = csv.writer(response)
+    
+    # Write CSV headers
+    writer.writerow(['ID', 'Category', 'Name', 'Description', 'Price', 'Is Sold', 'Stock', 'Created By', 'Created At'])
+
+    # Write data rows
+    for item in items:
+        writer.writerow([
+            item.id,
+            item.category.name,
+            item.name,
+            item.description,
+            item.price,
+            item.is_sold,
+            item.stock,
+            item.created_by.username,
+            item.created_at
+        ])
+
+    return response

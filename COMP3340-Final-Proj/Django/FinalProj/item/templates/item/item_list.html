@@ -16,7 +16,7 @@
         {% endfor %}
 </div>
 <div class="mt-6">
-    <nav aria-label="Page navigation"> <!-- From BootStrap Pagination-->
+    <nav aria-label="Page navigation"> <!-- From BootStrap Pagination FIXME Currently does not go to the next page and keep the current selected filters-->
         <ul class="pagination justify-content-center">
             {% if items.has_previous %}
                 <li class="page-item"><a class="page-link" href="?page=1">&laquo First</a></li>
